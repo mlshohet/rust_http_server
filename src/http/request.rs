@@ -71,7 +71,7 @@ impl ParseError {
         match self {
             Self::InvalidRequest => "Invalid Request",
             Self::InvalidEncoding => "Invalid Encoding",
-            Self::InvalidProtocol => "Invalid Protocl",
+            Self::InvalidProtocol => "Invalid Protocol",
             Self::InvalidMethod => "Invalid Method",
         }
     }
