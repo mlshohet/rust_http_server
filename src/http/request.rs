@@ -72,7 +72,7 @@ impl ParseError {
             Self::InvalidRequest => "Invalid Request",
             Self::InvalidEncoding => "Invalid Encoding",
             Self::InvalidProtocol => "Invalid Protocol",
-            Self::InvalidMethod => "Invalid Method",
+            Self::InvalidMethod => "Invald Method",
         }
     }
 }
