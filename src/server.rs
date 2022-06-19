@@ -1,7 +1,17 @@
 use std::net::TcpListener;
-use crate::http::{Request, Response, StatusCode};
+use crate::http::{Request, Response, StatusCode, ParseError};
 use std::convert::TryFrom;
 use std::io::{ Read, Write } ;
+
+pub trait Handler {
+    fn handle_request(&mut self, request: &Request) -> Response;
+
+    fn handle_bad_request(&mut self, e: &ParseError) -> Response {
+        println!("Failed to parse request: {}", e);
+        Response::new(StatusCode::BadRequest, None)
+    }
+}
+
 
 // declaration
 pub struct Server {
@@ -17,7 +27,7 @@ impl Server {
     // methods accept self (this) as first parameter
     // refenrence has to be used, because variables are deallocated
     // after function completes
-    pub fn run(self) {
+    pub fn run(self, mut handler: impl Handler) {
         println!("Listen on {}", self.addr);
 
         let listener = TcpListener::bind(&self.addr).unwrap();
@@ -34,17 +44,8 @@ impl Server {
                         Ok(_) => {
                             println!("Received a request: {}", String::from_utf8_lossy(&buffer));
                             let response = match Request::try_from(&buffer[..]) {
-                                Ok(request) => {
-                                    dbg!(request);
-                                    Response::new(
-                                        StatusCode::Ok,
-                                        Some("<h1>It works!!!</h1>".to_string())
-                                    )
-                                },
-                                Err(e) => {
-                                    println!("Failed to parse: {}", e);
-                                    Response::new(StatusCode::BadRequest, None)
-                                }
+                                Ok(request) => handler.handle_request(&request),
+                                Err(e) => handler.handle_bad_request(&e)
                             };
 
                             if let Err(e) = response.send(&mut stream) {
